@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,10 +20,16 @@ namespace PlayableTextRPG
         //Enemy
         static int enemyPosX; // Position X
         static int enemyPosY; // Position Y
+        static int enemy2PosX; // Position X for enemy 2
+        static int enemy2PosY; // Positoon Y for enemy 2
         static int maxEnemyHP; // Health can't go pass
+        static int maxEnemy2HP; // Health can't go pass for Enemy 2
         static int enemyHP; // Health of the enemy
+        static int enemy2HP; // Health of the enemy 2
         static int enemyDamage; // Enemy Damage
+        static int enemy2Damage; // Damage of Enemy 2 
         static bool enemyAlive; // Check to see if the enemy is alive
+        static bool enemy2Alive; // Check to see if the enemy 2 is alive
 
         // Map
         static string path; // Path for the Map
@@ -47,7 +54,7 @@ namespace PlayableTextRPG
             Console.WriteLine("Watch out for the enemies in the map trying to kill you");
             Console.WriteLine("\n");
             Console.WriteLine("To attack back either run into them or press space near them");
-            Console.WriteLine("Best of luck to you and watch out for the camo... enemies");
+            Console.WriteLine("Best of luck to you and watch out for the camo.f.... enemies");
             Console.WriteLine("Press any key to start...");
             Console.ReadKey(true);
             Console.Clear();
@@ -60,6 +67,7 @@ namespace PlayableTextRPG
                 DisplayLegend();
                 PlayerInput();
                 EnemyMovement();
+                MoveEnemy2();
 
             }
             Console.Clear();
@@ -82,18 +90,20 @@ namespace PlayableTextRPG
         static void DisplayHUD()
         {
             Console.SetCursorPosition(0, mapY + 1);
-            Console.WriteLine($"Health: {playerHP}/{maxPlayerHP} | Diamonds Raided: {Diamonds} | Enemy Health: {enemyHP}/{maxEnemyHP}");
+            Console.WriteLine($"||Health: {playerHP}/{maxPlayerHP} | Diamonds Raided: {Diamonds} | Enemy Health: {enemyHP}/{maxEnemyHP} | Enemy 2 Health: {enemy2HP}/{maxEnemy2HP}||");
         }
 
         static void DisplayLegend()
         {
-            Console.SetCursorPosition(0, mapY + 2);
-            Console.WriteLine("Player = !" + "\n" + "Enemy 1 = E" + "\n" + "Walls = #" + "\n" + "Floor = -" + "\n" + "Diamonds = &" + "\n" + "SpikeTrap = ^  Door: %");
+            Console.SetCursorPosition(0, mapY + 3);
+            Console.WriteLine("Map Legend");
+            Console.SetCursorPosition(0, mapY + 4);
+            Console.WriteLine("|| Player = + " + " Enemy 1 = B " + " Enemy 2 = ?" + "\n" + "|| Walls = #" + "\n" + "|| Floor = -" + "\n" + "|| Diamonds = @" + "\n" + "SpikeTrap = ^" + "\n" +  "Door = X");
         }
 
         static void OnStart()
         {
-            maxPlayerHP = 6;
+            maxPlayerHP = 10;
             maxEnemyHP = 3;
             playerHP = maxPlayerHP;
             enemyHP = maxEnemyHP;
@@ -101,6 +111,12 @@ namespace PlayableTextRPG
             playerDamage = 1;
             enemyDamage = 1;
             EnemyAlive();
+            
+            maxEnemy2HP = 1;
+            enemy2HP = maxEnemy2HP;
+            enemy2Damage = 2;
+            EnemyAlive(); // Testing this for enemy 2 might have to make a second method 
+
 
             Diamonds = 0;
 
@@ -139,7 +155,7 @@ namespace PlayableTextRPG
                     if (tile == '=' && FloorComplete == false)
                     {
                         playerPosX = l;
-                        playerPosY = k -1;
+                        playerPosY = k - 1;
                         FloorComplete = true;
                         mapLayout[k, l] = '#';
                     }
@@ -152,14 +168,47 @@ namespace PlayableTextRPG
                             enemyPosY = k;
                         }
                     }
+                    if (tile == '?' && FloorComplete == false)
+                    {
+                        if (tile == '?')
+                        {
+                            enemy2PosX = l;
+                            enemy2PosY = k;
+                        }
+                    }
+                    if (tile == '#')
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkGreen;
+                    }
+                    // Set color for floor '-'
+                    else if (tile == '-')
+                    {
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
+                    // Set color for diamonds '@'
+                    else if (tile == '@')
+                    {
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                    }
+                    else if (tile == '^')
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                    }
+                    // Reset color for other characters
+                    else
+                    {
+                        Console.ResetColor();
+                    }
                     Console.Write(tile);
                 }
                 Console.WriteLine();
             }
             PlayerPosition();
-            EnemyPosition();
+            Enemy1Position();
+            Enemy2Position(); // Add this line to update the position of Enemy 2
             Console.SetCursorPosition(0, 0);
         }
+
         static void PlayerPosition()
         {
             Console.SetCursorPosition(playerPosX, playerPosY);
@@ -188,6 +237,7 @@ namespace PlayableTextRPG
                 if (playerMovement.Key == ConsoleKey.Spacebar)
                 {
                     AttackEnemy();
+                    AttackEnemy2();
                     moved = true;
                     return;
                 }
@@ -228,6 +278,13 @@ namespace PlayableTextRPG
                     }
 
                     if (mapLayout[playerPosY, playerPosX] == 'B')
+                    {
+                        movementY = playerPosY;
+                        playerPosY = movementY;
+                        return;
+                    }
+
+                    if (mapLayout[playerPosY, playerPosX] == '?')
                     {
                         movementY = playerPosY;
                         playerPosY = movementY;
@@ -276,6 +333,13 @@ namespace PlayableTextRPG
                         playerPosY = movementY;
                         return;
                     }
+
+                    if (mapLayout[playerPosY, playerPosX] == '?')
+                    {
+                        movementY = playerPosY;
+                        playerPosY = movementY;
+                        return;
+                    }
                 }
             }
 
@@ -319,6 +383,13 @@ namespace PlayableTextRPG
                         playerPosX = movementX;
                         return;
                     }
+
+                    if (mapLayout[playerPosY, playerPosX] == '?')
+                    {
+                        movementX = playerPosY;
+                        playerPosY = movementX;
+                        return;
+                    }
                 }
             }
 
@@ -360,6 +431,13 @@ namespace PlayableTextRPG
                     {
                         movementX = playerPosX;
                         playerPosX = movementX;
+                        return;
+                    }
+
+                    if (mapLayout[playerPosY, playerPosX] == '?')
+                    {
+                        movementX = playerPosY;
+                        playerPosY = movementX;
                         return;
                     }
                 }
@@ -421,15 +499,16 @@ namespace PlayableTextRPG
                     enemyMovementX = Math.Min(enemyPosX + 1, maxX);
                 }
             }
+
             // Check for collisions and update the enemy position
-            if (mapLayout[enemyMovementY, enemyMovementX] != '#')
+            if (mapLayout[enemyMovementY, enemyMovementX] != '#' && mapLayout[enemyMovementY, enemyMovementX] != '^' && mapLayout[enemyMovementY, enemyMovementX] != 'X')
             {
                 // Reset the old position
                 mapLayout[newEnemyPositionY, newEnemyPositionX] = '-';
                 // Check if the enemy is still alive before updating the new position
                 if (enemyAlive)
                 {
-                    mapLayout[enemyMovementY, enemyMovementX] = '-';
+                    mapLayout[enemyMovementY, enemyMovementX] = '-'; // Set the enemy symbol
                     enemyPosX = enemyMovementX;
                     enemyPosY = enemyMovementY;
                     // Update the new position
@@ -449,9 +528,91 @@ namespace PlayableTextRPG
             }
         }
 
+        static void MoveEnemy2()
+        {
+            if (enemy2Alive)
+            {
+                int playerDistanceX = Math.Abs(playerPosX - enemy2PosX);
+                int playerDistanceY = Math.Abs(playerPosY - enemy2PosY);
+                int enemyMovement2X = enemy2PosX;
+                int enemyMovement2Y = enemy2PosY;
+                int newEnemyPosition2X = enemyMovement2X;
+                int newEnemyPosition2Y = enemyMovement2Y;
+
+                // Checks to see if the player is near
+                if (playerDistanceX <= 2 && playerDistanceY <= 2)
+                {
+                    // Moves towards the player
+                    if (playerPosX < enemy2PosX && mapLayout[enemy2PosY, enemy2PosX - 1] != '#')
+                    {
+                        enemyMovement2X--;
+                    }
+                    else if (playerPosX > enemy2PosX && mapLayout[enemy2PosY, enemy2PosX + 1] != '#')
+                    {
+                        enemyMovement2X++;
+                    }
+
+                    if (playerPosY < enemy2PosY && mapLayout[enemy2PosY - 1, enemy2PosX] != '#')
+                    {
+                        enemyMovement2Y--;
+                    }
+                    else if (playerPosY > enemy2PosY && mapLayout[enemy2PosY + 1, enemy2PosX] != '#')
+                    {
+                        enemyMovement2Y++;
+                    }
+                }
+
+                // Makes the enemy not move if the player is on the same position
+                if ((enemyMovement2X != playerPosX || enemyMovement2Y != playerPosY) &&
+                    mapLayout[enemyMovement2Y, enemyMovement2X] != '#')
+                {
+                    // Reset the old position
+                    mapLayout[newEnemyPosition2Y, newEnemyPosition2X] = '-';
+                    // Check if the enemy is still alive before updating the new position
+                    if (enemy2Alive)
+                    {
+                        mapLayout[enemyMovement2Y, enemyMovement2X] = '-';
+                        enemy2PosX = enemyMovement2X;
+                        enemy2PosY = enemyMovement2Y;
+                        newEnemyPosition2X = enemy2PosX;
+                        newEnemyPosition2Y = enemy2PosY;
+                    }
+                }
+                if (Math.Abs(enemy2PosX - playerPosX) <= 1 && Math.Abs(enemy2PosY - playerPosY) <= 1)
+                {
+                    playerHP -= 1;
+                    if (playerHP <= 0)
+                    {
+                        gameOver = true;
+                    }
+                }
+            }
+        }
+        // Spawns Enemy 1
+        static void Enemy1Position()
+        {
+            if (enemyAlive)
+            {
+                Console.SetCursorPosition(enemyPosX, enemyPosY);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write("B");
+                Console.ResetColor();
+            }
+        }
+        // Spawns Enemy 2 
+        static void Enemy2Position()
+        {
+            if (enemy2Alive)
+            {
+            Console.SetCursorPosition(enemy2PosX, enemy2PosY);
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
+            Console.Write("?");
+            Console.ResetColor();
+            }
+        }
+        // Enmey 1 attack
         static void AttackEnemy()
         {
-
             if (Math.Abs(playerPosX - enemyPosX) <= 1 && Math.Abs(playerPosY - enemyPosY) <= 1)
             {
                 enemyHP -= 1;
@@ -463,23 +624,26 @@ namespace PlayableTextRPG
                 }
             }
         }
-        // Spawns Enemy
-        static void EnemyPosition()
+        //Enemy 2 attack
+        static void AttackEnemy2()
         {
-            if (enemyAlive)
+            if (Math.Abs(playerPosX - enemy2PosX) <= 1 && Math.Abs(playerPosY - enemy2PosY) <= 1)
             {
-                Console.SetCursorPosition(enemyPosX, enemyPosY);
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("B");
-                Console.ResetColor();
+                enemy2HP -= 1;
+                if (enemy2HP <= 0)
+                {
+                    enemy2PosX = 0;
+                    enemy2PosY = 0;
+                    enemy2Alive = false;
+                }
             }
         }
-
 
         // Checking for enemies 
         static void EnemyAlive()
         {
             enemyAlive = true;
+            enemy2Alive = true;
         }
     }
 }
