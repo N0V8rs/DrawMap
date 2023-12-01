@@ -386,74 +386,69 @@ namespace PlayableTextRPG
             }
         }
 
-            static void EnemyMovement()
+        static void EnemyMovement()
+        {
+            int enemyMovementX = enemyPosX;
+            int enemyMovementY = enemyPosY;
+
+            // random roll to move
+            Random randomRoll = new Random();
+
+            // enemy will have 1 of 4 options to move
+            int rollResult = randomRoll.Next(1, 5);
+
+            int newEnemyPositionX = enemyMovementX;
+            int newEnemyPositionY = enemyMovementY;
+
+            // Retry movement if the position is the same as the player or the new position
+            while ((enemyMovementX == playerPosX && enemyMovementY == playerPosY) || (enemyMovementX == newEnemyPositionX && enemyMovementY == newEnemyPositionY))
             {
-                int enemyMovementX = enemyPosX;
-                int enemyMovementY = enemyPosY;
-                int newEnemyPositionX = enemyPosX;
-                int newEnemyPositionY = enemyPosY;
-
-                // random roll to move
-                Random randomRoll = new Random();
-
-                // enemy will have 1 of 4 options to move
-                int rollResult = randomRoll.Next(1, 5);
-
-                while ((enemyMovementX == playerPosX && enemyMovementY == playerPosY) ||
-                (enemyMovementX == newEnemyPositionX && enemyMovementY == newEnemyPositionY))
+                rollResult = randomRoll.Next(1, 5);
+                if (rollResult == 1)
                 {
-
-                    rollResult = randomRoll.Next(1, 5); // Retry if the position is the same as the player
-                    if (rollResult == 1)
-                    {
-                       enemyMovementY = enemyPosY + 1;
-                       if (enemyMovementY >= maxY)
-                       {
-                           enemyMovementY = maxY;
-                       }
-                    }
-                    else if (rollResult == 2)
-                    {
-                        enemyMovementY = enemyPosY - 1;
-                        if (enemyMovementY <= 0)
-                        {
-                            enemyMovementY = 0;
-                        }
-                    }
-                    else if (rollResult == 3)
-                    {
-                        enemyMovementX = enemyPosX - 1;
-                        if (enemyMovementX <= 0)
-                        {
-                            enemyMovementX = 0;
-                        }
-                    }
-                    else // The 4 move the enemy can move
-                    {
-                        enemyMovementX = enemyPosX + 1;
-                        if (enemyMovementX >= maxX)
-                        {
-                            enemyMovementX = maxX;
-                        }
-                    }
+                    enemyMovementY = Math.Min(enemyPosY + 1, maxY);
                 }
-                // Check for collisions and update the enemy position
-                if (mapLayout[enemyMovementY, enemyMovementX] != '#')
+                else if (rollResult == 2)
                 {
-                    mapLayout[enemyPosY, enemyPosX] = '-';
-                    enemyPosX = enemyMovementX;
-                    enemyPosY = enemyMovementY;
+                    enemyMovementY = Math.Max(enemyPosY - 1, 0);
                 }
-                // Checks to see if the enemy is in the attack position
-                if (enemyMovementX == newEnemyPositionX && enemyMovementY == newEnemyPositionY)
+                else if (rollResult == 3)
                 {
-                    playerHP -= 1;
-                    if (playerHP <= 0)
-                    {
-                        gameOver = true;
-                    }
+                    enemyMovementX = Math.Max(enemyPosX - 1, 0);
+                }
+                else // The 4 move the enemy can move
+                {
+                    enemyMovementX = Math.Min(enemyPosX + 1, maxX);
                 }
             }
+            // Check for collisions and update the enemy position
+            if (mapLayout[enemyMovementY, enemyMovementX] != '#')
+            {
+                // Reset the old position
+                mapLayout[newEnemyPositionY, newEnemyPositionX] = '-';
+                // Check if the enemy is still alive before updating the new position
+                if (enemyAlive)
+                {
+                    mapLayout[enemyMovementY, enemyMovementX] = '-';
+                    enemyPosX = enemyMovementX;
+                    enemyPosY = enemyMovementY;
+                    // Update the new position
+                    newEnemyPositionX = enemyPosX;
+                    newEnemyPositionY = enemyPosY;
+                }
+            }
+
+            // Checks to see if the enemy is in the attack position
+            if (Math.Abs(enemyPosX - playerPosX) <= 1 && Math.Abs(enemyPosY - playerPosY) <= 1)
+            {
+                playerHP -= 1;
+                if (playerHP <= 0)
+                {
+                    gameOver = true;
+                }
+            }
+        }
+
         static void AttackEnemy()
         {
 
@@ -468,13 +463,18 @@ namespace PlayableTextRPG
                 }
             }
         }
+        // Spawns Enemy
         static void EnemyPosition()
         {
-            Console.SetCursorPosition(enemyPosX, enemyPosY);
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write("B");
-            Console.ResetColor();
+            if (enemyAlive)
+            {
+                Console.SetCursorPosition(enemyPosX, enemyPosY);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write("B");
+                Console.ResetColor();
+            }
         }
+
 
         // Checking for enemies 
         static void EnemyAlive()
