@@ -48,12 +48,12 @@ namespace PlayableTextRPG
         static void Main(string[] args)
         {
             OnStart();
-            Console.WriteLine("playing ");
+            Console.WriteLine("Now playing Noah Vaters RPG Map ");
             Console.WriteLine("\n");
-            Console.WriteLine("Get as much Diamonds around the map");
+            Console.WriteLine("Get as much Diamonds around the map and get to the exit");
             Console.WriteLine("Watch out for the enemies in the map trying to kill you");
             Console.WriteLine("\n");
-            Console.WriteLine("To attack back either run into them or press space near them");
+            Console.WriteLine("To attack back press space near them");
             Console.WriteLine("Best of luck to you and watch out for the camo.f.... enemies");
             Console.WriteLine("Press any key to start...");
             Console.ReadKey(true);
@@ -95,12 +95,33 @@ namespace PlayableTextRPG
 
         static void DisplayLegend()
         {
-            Console.SetCursorPosition(0, mapY + 3);
-            Console.WriteLine("Map Legend");
+            Console.SetCursorPosition(0, mapY +3);
+            Console.WriteLine("| Map Legend");
             Console.SetCursorPosition(0, mapY + 4);
-            Console.WriteLine("|| Player = + " + " Enemy 1 = B " + " Enemy 2 = ?" + "\n" + "|| Walls = #" + "\n" + "|| Floor = -" + "\n" + "|| Diamonds = @" + "\n" + "SpikeTrap = ^" + "\n" +  "Door = X");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("| Player = + ");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write(" Enemy 1 = B ");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write(" Enemy 2 =   |");
+            Console.WriteLine("\n");
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
+            Console.Write("| Walls = # |");
+            Console.WriteLine("\n");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.Write("| Floor = - |");
+            Console.WriteLine("\n");
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.Write("| Diamonds = @ ");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(" SpikeTrap = ^ ");
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.Write(" Exit = X |");
+            Console.ResetColor();
+            Console.WriteLine();
         }
 
+        // Startup player and enemies HP and Damage
         static void OnStart()
         {
             maxPlayerHP = 10;
@@ -115,8 +136,7 @@ namespace PlayableTextRPG
             maxEnemy2HP = 1;
             enemy2HP = maxEnemy2HP;
             enemy2Damage = 2;
-            EnemyAlive(); // Testing this for enemy 2 might have to make a second method 
-
+            EnemyAlive(); // Testing this for enemy 2 might have to make a second method // Everything seems fine
 
             Diamonds = 0;
 
@@ -132,6 +152,7 @@ namespace PlayableTextRPG
             maxX = mapX - 1;
             maxY = mapY - 1;
         }
+        //Creates the layout
         static void CreateMap()
         {
             for (int i = 0; i < floorMap.Length; i++)
@@ -142,6 +163,7 @@ namespace PlayableTextRPG
                 }
             }
         }
+        //Makes the map
         static void DrawMap()
         {
             Console.Clear();
@@ -194,6 +216,10 @@ namespace PlayableTextRPG
                     {
                         Console.ForegroundColor = ConsoleColor.DarkGray;
                     }
+                    else if (tile == 'X')
+                    { 
+                         Console.ForegroundColor = ConsoleColor.Magenta;
+                    }
                     // Reset color for other characters
                     else
                     {
@@ -208,7 +234,7 @@ namespace PlayableTextRPG
             Enemy2Position(); // Add this line to update the position of Enemy 2
             Console.SetCursorPosition(0, 0);
         }
-
+        //Spawns the player
         static void PlayerPosition()
         {
             Console.SetCursorPosition(playerPosX, playerPosY);
@@ -216,7 +242,7 @@ namespace PlayableTextRPG
             Console.Write("+");
             Console.ResetColor();
         }
-
+        //Movement for the player
         static void PlayerInput()
         {
             bool moved = false; // Checks to see if the player moves
@@ -472,7 +498,7 @@ namespace PlayableTextRPG
             // random roll to move
             Random randomRoll = new Random();
 
-            // enemy will have 1 of 4 options to move
+            //  1 of 4 options to move
             int rollResult = randomRoll.Next(1, 5);
 
             int newEnemyPositionX = enemyMovementX;
